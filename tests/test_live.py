@@ -62,7 +62,7 @@ async def test_live_list_comments(client):
         
     market_id = markets[0].id
     try:
-        # Gamma API typically uses camelCase
+        # Gamma API filters for comments
         comments = await client.comments.list(parentEntityId=market_id, entityEntityType="market")
         assert isinstance(comments, list)
         if comments:

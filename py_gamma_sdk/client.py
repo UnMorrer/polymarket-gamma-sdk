@@ -169,7 +169,6 @@ class GammaClient:
         self.timeout = timeout
         self._http_client = httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout)
 
-        # Initialize sub-clients
         self.sports = SportsClient(self)
         self.tags = TagsClient(self)
         self.events = EventsClient(self)
@@ -195,7 +194,6 @@ class GammaClient:
                 raise NotFoundError(f"Resource not found: {endpoint}", status_code=404)
             response.raise_for_status()
             
-            # Handle non-JSON responses (like /status returning plain text "OK")
             content_type = response.headers.get("Content-Type", "")
             if "application/json" in content_type:
                 return response.json()
