@@ -2,6 +2,9 @@
 
 An asynchronous Python SDK for Polymarket's Gamma API, built with `httpx` and `pydantic`.
 
+> [!IMPORTANT]
+> **Disclaimer**: This is an community-maintained, unofficial SDK. This project is **not** affiliated with, endorsed by, or in any way associated with Polymarket.
+
 This SDK provides a clean, type-safe interface to interact with Polymarket's market discovery and metadata API.
 
 ## Features
