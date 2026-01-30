@@ -1,0 +1,27 @@
+[project]
+name = "polymarket-gamma-sdk"
+version = "1.0.0"
+description = "Polymarket gamma SDK"
+authors = [
+    { name = "Marcell O", email = "omarcell@yahoo.com" }
+]
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/polymarket_gamma_sdk"]
