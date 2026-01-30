@@ -6,6 +6,17 @@ from urllib.parse import urlparse
 from .constants import BASE_URL, DEFAULT_TIMEOUT
 from .exceptions import GammaError, GammaAPIError, NotFoundError, ValidationError
 from .models import Market, Event, Tag, Team, SportMetadata, Series, Comment, Profile
+from .routes import (
+    SPORTS, SPORTS_TEAMS, SPORTS_MARKET_TYPES,
+    TAGS, TAGS_BY_ID, TAGS_BY_SLUG, TAGS_RELATED_BY_ID, TAGS_RELATED_BY_SLUG,
+    TAGS_RELATED_TO_ID, TAGS_RELATED_TO_SLUG,
+    EVENTS, EVENTS_BY_ID, EVENTS_TAGS, EVENTS_BY_SLUG,
+    MARKETS, MARKETS_BY_ID, MARKETS_TAGS, MARKETS_BY_SLUG,
+    SERIES, SERIES_BY_ID,
+    COMMENTS, COMMENTS_BY_ID, COMMENTS_BY_USER,
+    PROFILES_BY_ADDRESS,
+    STATUS, SEARCH, PUBLIC_SEARCH,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +38,7 @@ class SportsClient(BaseSyncSubClient):
         :param params: Optional query parameters (e.g., league, name, limit).
         :return: A list of Team objects.
         """
-        data = self._client._request("GET", "/teams", params=params)
+        data = self._client._request("GET", SPORTS_TEAMS, params=params)
         return [Team(**item) for item in data]
 
     def get_metadata(self) -> List[SportMetadata]:
@@ -36,16 +47,16 @@ class SportsClient(BaseSyncSubClient):
         
         :return: A list of SportMetadata objects.
         """
-        data = self._client._request("GET", "/sports")
+        data = self._client._request("GET", SPORTS)
         return [SportMetadata(**item) for item in data]
 
     def get_market_types(self) -> List[str]:
         """
         Get valid sports market types.
-        
+
         :return: A list of strings representing market types.
         """
-        data = self._client._request("GET", "/sports/market-types")
+        data = self._client._request("GET", SPORTS_MARKET_TYPES)
         return data.get("marketTypes", [])
 
 class TagsClient(BaseSyncSubClient):
@@ -53,110 +64,110 @@ class TagsClient(BaseSyncSubClient):
     
     def list(self, **params) -> List[Tag]:
         """List all available tags."""
-        data = self._client._request("GET", "/tags", params=params)
+        data = self._client._request("GET", TAGS, params=params)
         return [Tag(**item) for item in data]
 
     def get_by_id(self, tag_id: str) -> Tag:
         """Get a specific tag by its unique ID."""
-        data = self._client._request("GET", f"/tags/{tag_id}")
+        data = self._client._request("GET", TAGS_BY_ID.format(tag_id=tag_id))
         return Tag(**data)
 
     def get_by_slug(self, slug: str) -> Tag:
         """Get a specific tag by its URL slug."""
-        data = self._client._request("GET", f"/tags/slug/{slug}")
+        data = self._client._request("GET", TAGS_BY_SLUG.format(slug=slug))
         return Tag(**data)
 
     def get_related_by_id(self, tag_id: str) -> List[Dict]:
-        return self._client._request("GET", f"/tags-related-tag-id/{tag_id}")
+        return self._client._request("GET", TAGS_RELATED_BY_ID.format(tag_id=tag_id))
 
     def get_related_by_slug(self, slug: str) -> List[Dict]:
-        return self._client._request("GET", f"/tags-related-tag-slug/{slug}")
+        return self._client._request("GET", TAGS_RELATED_BY_SLUG.format(slug=slug))
 
     def get_tags_related_to_id(self, tag_id: str) -> List[Tag]:
-        data = self._client._request("GET", f"/tags/{tag_id}/related")
+        data = self._client._request("GET", TAGS_RELATED_TO_ID.format(tag_id=tag_id))
         return [Tag(**item) for item in data]
 
     def get_tags_related_to_slug(self, slug: str) -> List[Tag]:
-        data = self._client._request("GET", f"/tags/slug/{slug}/related")
+        data = self._client._request("GET", TAGS_RELATED_TO_SLUG.format(slug=slug))
         return [Tag(**item) for item in data]
 
 class EventsClient(BaseSyncSubClient):
     """Client for discovering events (groups of markets)."""
-    
+
     def list(self, **params) -> List[Event]:
         """List events based on provided filters."""
-        data = self._client._request("GET", "/events", params=params)
+        data = self._client._request("GET", EVENTS, params=params)
         return [Event(**item) for item in data]
 
     def get_by_id(self, event_id: str) -> Event:
         """Get a specific event by ID."""
-        data = self._client._request("GET", f"/events/{event_id}")
+        data = self._client._request("GET", EVENTS_BY_ID.format(event_id=event_id))
         return Event(**data)
 
     def get_tags(self, event_id: str) -> List[Tag]:
         """Get tags associated with an event."""
-        data = self._client._request("GET", f"/events/{event_id}/tags")
+        data = self._client._request("GET", EVENTS_TAGS.format(event_id=event_id))
         return [Tag(**item) for item in data]
 
     def get_by_slug(self, slug: str) -> Event:
         """Get an event by its unique slug."""
-        data = self._client._request("GET", f"/events/slug/{slug}")
+        data = self._client._request("GET", EVENTS_BY_SLUG.format(slug=slug))
         return Event(**data)
 
 class MarketsClient(BaseSyncSubClient):
     """Client for accessing Polymarket market data."""
-    
+
     def list(self, **params) -> List[Market]:
         """
         List markets with extensive filtering options.
-        
+
         :param params: Filters like active, tag_id, slug, limit, offset, etc.
         """
-        data = self._client._request("GET", "/markets", params=params)
+        data = self._client._request("GET", MARKETS, params=params)
         return [Market(**item) for item in data]
 
     def get_by_id(self, market_id: str) -> Market:
         """Get a specific market by its ID."""
-        data = self._client._request("GET", f"/markets/{market_id}")
+        data = self._client._request("GET", MARKETS_BY_ID.format(market_id=market_id))
         return Market(**data)
 
     def get_tags(self, market_id: str) -> List[Tag]:
         """Get tags associated with a specific market."""
-        data = self._client._request("GET", f"/markets/{market_id}/tags")
+        data = self._client._request("GET", MARKETS_TAGS.format(market_id=market_id))
         return [Tag(**item) for item in data]
 
     def get_by_slug(self, slug: str) -> Market:
         """Get a market by its unique slug."""
-        data = self._client._request("GET", f"/markets/slug/{slug}")
+        data = self._client._request("GET", MARKETS_BY_SLUG.format(slug=slug))
         if isinstance(data, list):
             return Market(**data[0]) if data else None
         return Market(**data)
 
 class SeriesClient(BaseSyncSubClient):
     def list(self, **params) -> List[Series]:
-        data = self._client._request("GET", "/series", params=params)
+        data = self._client._request("GET", SERIES, params=params)
         return [Series(**item) for item in data]
 
     def get_by_id(self, series_id: str) -> Series:
-        data = self._client._request("GET", f"/series/{series_id}")
+        data = self._client._request("GET", SERIES_BY_ID.format(series_id=series_id))
         return Series(**data)
 
 class CommentsClient(BaseSyncSubClient):
     def list(self, **params) -> List[Comment]:
-        data = self._client._request("GET", "/comments", params=params)
+        data = self._client._request("GET", COMMENTS, params=params)
         return [Comment(**item) for item in data]
 
     def get_by_id(self, comment_id: str) -> Comment:
-        data = self._client._request("GET", f"/comments/{comment_id}")
+        data = self._client._request("GET", COMMENTS_BY_ID.format(comment_id=comment_id))
         return Comment(**data)
 
     def get_by_user(self, address: str) -> List[Comment]:
-        data = self._client._request("GET", f"/comments/user/{address}")
+        data = self._client._request("GET", COMMENTS_BY_USER.format(address=address))
         return [Comment(**item) for item in data]
 
 class ProfilesClient(BaseSyncSubClient):
     def get_by_address(self, address: str) -> Profile:
-        data = self._client._request("GET", f"/profiles/{address}")
+        data = self._client._request("GET", PROFILES_BY_ADDRESS.format(address=address))
         return Profile(**data)
 
 class GammaClient:
@@ -218,11 +229,15 @@ class GammaClient:
             raise GammaAPIError(f"Unexpected Error: {e}")
 
     def get_status(self) -> str:
-        return self._request("GET", "/status")
+        return self._request("GET", STATUS)
 
     def search(self, query: str, **params) -> Dict[str, Any]:
         params["q"] = query
-        return self._request("GET", "/search", params=params)
+        return self._request("GET", SEARCH, params=params)
+
+    def public_search(self, query: str, **params) -> Dict[str, Any]:
+        params["q"] = query
+        return self._request("GET", PUBLIC_SEARCH, params=params)
 
     def resolve_url(self, url: str) -> Union[Market, Event, None]:
         """
@@ -266,113 +281,113 @@ class BaseAsyncSubClient:
 
 class AsyncSportsClient(BaseAsyncSubClient):
     """Client for fetching sports-related metadata and team information."""
-    
+
     async def list_teams(self, **params) -> List[Team]:
-        data = await self._client._request("GET", "/teams", params=params)
+        data = await self._client._request("GET", SPORTS_TEAMS, params=params)
         return [Team(**item) for item in data]
 
     async def get_metadata(self) -> List[SportMetadata]:
-        data = await self._client._request("GET", "/sports")
+        data = await self._client._request("GET", SPORTS)
         return [SportMetadata(**item) for item in data]
 
     async def get_market_types(self) -> List[str]:
-        data = await self._client._request("GET", "/sports/market-types")
+        data = await self._client._request("GET", SPORTS_MARKET_TYPES)
         return data.get("marketTypes", [])
 
 class AsyncTagsClient(BaseAsyncSubClient):
     """Client for managing and discovering tags."""
-    
+
     async def list(self, **params) -> List[Tag]:
-        data = await self._client._request("GET", "/tags", params=params)
+        data = await self._client._request("GET", TAGS, params=params)
         return [Tag(**item) for item in data]
 
     async def get_by_id(self, tag_id: str) -> Tag:
-        data = await self._client._request("GET", f"/tags/{tag_id}")
+        data = await self._client._request("GET", TAGS_BY_ID.format(tag_id=tag_id))
         return Tag(**data)
 
     async def get_by_slug(self, slug: str) -> Tag:
-        data = await self._client._request("GET", f"/tags/slug/{slug}")
+        data = await self._client._request("GET", TAGS_BY_SLUG.format(slug=slug))
         return Tag(**data)
 
     async def get_related_by_id(self, tag_id: str) -> List[Dict]:
-        return await self._client._request("GET", f"/tags-related-tag-id/{tag_id}")
+        return await self._client._request("GET", TAGS_RELATED_BY_ID.format(tag_id=tag_id))
 
     async def get_related_by_slug(self, slug: str) -> List[Dict]:
-        return await self._client._request("GET", f"/tags-related-tag-slug/{slug}")
+        return await self._client._request("GET", TAGS_RELATED_BY_SLUG.format(slug=slug))
 
     async def get_tags_related_to_id(self, tag_id: str) -> List[Tag]:
-        data = await self._client._request("GET", f"/tags/{tag_id}/related")
+        data = await self._client._request("GET", TAGS_RELATED_TO_ID.format(tag_id=tag_id))
         return [Tag(**item) for item in data]
 
     async def get_tags_related_to_slug(self, slug: str) -> List[Tag]:
-        data = await self._client._request("GET", f"/tags/slug/{slug}/related")
+        data = await self._client._request("GET", TAGS_RELATED_TO_SLUG.format(slug=slug))
         return [Tag(**item) for item in data]
 
 class AsyncEventsClient(BaseAsyncSubClient):
     """Client for discovering events (groups of markets)."""
-    
+
     async def list(self, **params) -> List[Event]:
-        data = await self._client._request("GET", "/events", params=params)
+        data = await self._client._request("GET", EVENTS, params=params)
         return [Event(**item) for item in data]
 
     async def get_by_id(self, event_id: str) -> Event:
-        data = await self._client._request("GET", f"/events/{event_id}")
+        data = await self._client._request("GET", EVENTS_BY_ID.format(event_id=event_id))
         return Event(**data)
 
     async def get_tags(self, event_id: str) -> List[Tag]:
-        data = await self._client._request("GET", f"/events/{event_id}/tags")
+        data = await self._client._request("GET", EVENTS_TAGS.format(event_id=event_id))
         return [Tag(**item) for item in data]
 
     async def get_by_slug(self, slug: str) -> Event:
-        data = await self._client._request("GET", f"/events/slug/{slug}")
+        data = await self._client._request("GET", EVENTS_BY_SLUG.format(slug=slug))
         return Event(**data)
 
 class AsyncMarketsClient(BaseAsyncSubClient):
     """Client for accessing Polymarket market data."""
-    
+
     async def list(self, **params) -> List[Market]:
-        data = await self._client._request("GET", "/markets", params=params)
+        data = await self._client._request("GET", MARKETS, params=params)
         return [Market(**item) for item in data]
 
     async def get_by_id(self, market_id: str) -> Market:
-        data = await self._client._request("GET", f"/markets/{market_id}")
+        data = await self._client._request("GET", MARKETS_BY_ID.format(market_id=market_id))
         return Market(**data)
 
     async def get_tags(self, market_id: str) -> List[Tag]:
-        data = await self._client._request("GET", f"/markets/{market_id}/tags")
+        data = await self._client._request("GET", MARKETS_TAGS.format(market_id=market_id))
         return [Tag(**item) for item in data]
 
     async def get_by_slug(self, slug: str) -> Market:
-        data = await self._client._request("GET", f"/markets/slug/{slug}")
+        data = await self._client._request("GET", MARKETS_BY_SLUG.format(slug=slug))
         if isinstance(data, list):
             return Market(**data[0]) if data else None
         return Market(**data)
 
 class AsyncSeriesClient(BaseAsyncSubClient):
     async def list(self, **params) -> List[Series]:
-        data = await self._client._request("GET", "/series", params=params)
+        data = await self._client._request("GET", SERIES, params=params)
         return [Series(**item) for item in data]
 
     async def get_by_id(self, series_id: str) -> Series:
-        data = await self._client._request("GET", f"/series/{series_id}")
+        data = await self._client._request("GET", SERIES_BY_ID.format(series_id=series_id))
         return Series(**data)
 
 class AsyncCommentsClient(BaseAsyncSubClient):
     async def list(self, **params) -> List[Comment]:
-        data = await self._client._request("GET", "/comments", params=params)
+        data = await self._client._request("GET", COMMENTS, params=params)
         return [Comment(**item) for item in data]
 
     async def get_by_id(self, comment_id: str) -> Comment:
-        data = await self._client._request("GET", f"/comments/{comment_id}")
+        data = await self._client._request("GET", COMMENTS_BY_ID.format(comment_id=comment_id))
         return Comment(**data)
 
     async def get_by_user(self, address: str) -> List[Comment]:
-        data = await self._client._request("GET", f"/comments/user/{address}")
+        data = await self._client._request("GET", COMMENTS_BY_USER.format(address=address))
         return [Comment(**item) for item in data]
 
 class AsyncProfilesClient(BaseAsyncSubClient):
     async def get_by_address(self, address: str) -> Profile:
-        data = await self._client._request("GET", f"/profiles/{address}")
+        data = await self._client._request("GET", PROFILES_BY_ADDRESS.format(address=address))
         return Profile(**data)
 
 class AsyncGammaClient:
@@ -427,11 +442,15 @@ class AsyncGammaClient:
             raise GammaAPIError(f"Unexpected Error: {e}")
 
     async def get_status(self) -> str:
-        return await self._request("GET", "/status")
+        return await self._request("GET", STATUS)
 
     async def search(self, query: str, **params) -> Dict[str, Any]:
         params["q"] = query
-        return await self._request("GET", "/search", params=params)
+        return await self._request("GET", SEARCH, params=params)
+
+    async def public_search(self, query: str, **params) -> Dict[str, Any]:
+        params["q"] = query
+        return await self._request("GET", PUBLIC_SEARCH, params=params)
 
     async def resolve_url(self, url: str) -> Union[Market, Event, None]:
         """
