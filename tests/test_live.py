@@ -1,6 +1,6 @@
 import pytest
-import os
-from py_gamma_sdk.models import Market, Event, Tag, Team, SportMetadata, Series, Comment, Profile
+
+from py_gamma_sdk.models import Market, Event, Tag, Team, SportMetadata, Series, Comment, PublicSearchResponse, PublicSearchEvent
 from py_gamma_sdk.exceptions import GammaAPIError
 
 # These tests hit the live Gamma API.
@@ -102,3 +102,10 @@ async def test_live_get_tag_by_slug(client):
     tag = await client.tags.get_by_slug("politics")
     assert isinstance(tag, Tag)
     assert tag.slug == "politics"
+
+@pytest.mark.asyncio
+async def test_live_public_search(client):
+    result = await client.public_search("bitcoin")
+    assert isinstance(result, PublicSearchResponse)
+    assert len(result.events) > 0
+    assert isinstance(result.events[0], PublicSearchEvent)

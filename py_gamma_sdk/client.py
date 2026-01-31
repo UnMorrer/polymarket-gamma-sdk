@@ -5,7 +5,10 @@ from urllib.parse import urlparse
 
 from .constants import BASE_URL, DEFAULT_TIMEOUT
 from .exceptions import GammaError, GammaAPIError, NotFoundError, ValidationError
-from .models import Market, Event, Tag, Team, SportMetadata, Series, Comment, Profile
+from .models import (
+    Market, Event, Tag, Team, SportMetadata, Series, Comment, Profile,
+    PublicSearchResponse, PublicSearchEvent, PublicSearchMarket,
+)
 from .routes import (
     SPORTS, SPORTS_TEAMS, SPORTS_MARKET_TYPES,
     TAGS, TAGS_BY_ID, TAGS_BY_SLUG, TAGS_RELATED_BY_ID, TAGS_RELATED_BY_SLUG,
@@ -235,9 +238,10 @@ class GammaClient:
         params["q"] = query
         return self._request("GET", SEARCH, params=params)
 
-    def public_search(self, query: str, **params) -> Dict[str, Any]:
+    def public_search(self, query: str, **params) -> Dict[str, Any]: #PublicSearchResponse:
         params["q"] = query
-        return self._request("GET", PUBLIC_SEARCH, params=params)
+        data = self._request("GET", PUBLIC_SEARCH, params=params)
+        return PublicSearchResponse(**data)
 
     def resolve_url(self, url: str) -> Union[Market, Event, None]:
         """
@@ -448,9 +452,10 @@ class AsyncGammaClient:
         params["q"] = query
         return await self._request("GET", SEARCH, params=params)
 
-    async def public_search(self, query: str, **params) -> Dict[str, Any]:
+    async def public_search(self, query: str, **params) -> PublicSearchResponse:
         params["q"] = query
-        return await self._request("GET", PUBLIC_SEARCH, params=params)
+        data = await self._request("GET", PUBLIC_SEARCH, params=params)
+        return PublicSearchResponse(**data)
 
     async def resolve_url(self, url: str) -> Union[Market, Event, None]:
         """

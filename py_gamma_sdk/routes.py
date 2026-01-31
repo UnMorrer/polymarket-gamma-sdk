@@ -2,7 +2,7 @@
 
 # Sports routes
 SPORTS = "/sports"
-SPORTS_TEAMS = "/sports/teams"
+SPORTS_TEAMS = "/teams"
 SPORTS_MARKET_TYPES = "/sports/market-types"
 
 # Tags routes
