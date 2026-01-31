@@ -238,10 +238,38 @@ class GammaClient:
         params["q"] = query
         return self._request("GET", SEARCH, params=params)
 
-    def public_search(self, query: str, **params) -> Dict[str, Any]: #PublicSearchResponse:
+    def public_search(self, query: str, **params) -> PublicSearchResponse:
         params["q"] = query
         data = self._request("GET", PUBLIC_SEARCH, params=params)
         return PublicSearchResponse(**data)
+
+    def public_search_all(self, query: str, **params) -> PublicSearchResponse:
+        page = 1
+        page_count = None
+        api_params = {
+            "page": page,
+            "limit_per_type": params.get("limit_per_type", 20),
+            "type": params.get("type", "events"),
+            "sort": params.get("sort", "volume_24hr"),
+        }
+        for k,v in params.items():
+            api_params[k] = v
+
+        data = self.public_search(query, **api_params)
+        if data.pagination is not None:
+            page_count = data.pagination["totalResults"] // api_params["limit_per_type"] + 1
+        
+        if page_count is None or not data.pagination["hasMore"]:
+            return data
+
+        events = []
+        events.extend(data.events)
+        for page in range(2, page_count):
+            data = self.public_search(query, **api_params)
+            events.extend(data.events)
+        
+        return PublicSearchResponse(events=events)
+
 
     def resolve_url(self, url: str) -> Union[Market, Event, None]:
         """

@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Union, Dict, Annotated
+from typing import Optional, Any, Union, Annotated
 from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
 from datetime import datetime
 
@@ -46,8 +46,8 @@ class Market(GammaBaseModel):
     amm_type: Optional[str] = Field(None, alias="ammType")
     liquidity: Optional[float] = None
     volume: Optional[float] = None
-    outcomes: Union[List[str], str]
-    clob_token_ids: Union[List[str], str] = Field(..., alias="clobTokenIds")
+    outcomes: Union[list[str], str]
+    clob_token_ids: Union[list[str], str] = Field(..., alias="clobTokenIds")
     group_item_title: Optional[str] = Field(None, alias="groupItemTitle")
     group_item_threshold: Optional[str] = Field(None, alias="groupItemThreshold")
     question_id: Optional[str] = Field(None, alias="questionId")
@@ -82,8 +82,8 @@ class Event(GammaBaseModel):
     end_date: Optional[datetime] = Field(None, alias="endDate")
     creation_date: Optional[datetime] = Field(None, alias="creationDate")
     last_updated_at: Optional[datetime] = Field(None, alias="lastUpdatedAt")
-    markets: List[Market] = []
-    tags: List[Tag] = []
+    markets: list[Market] = []
+    tags: list[Tag] = []
 
 class Team(GammaBaseModel):
     """Represents a sports team."""
@@ -248,10 +248,10 @@ class PublicSearchEvent(GammaBaseModel):
     neg_risk: Optional[bool] = Field(None, alias="negRisk")
     neg_risk_market_id: Optional[str] = Field(None, alias="negRiskMarketID")
     comment_count: Optional[int] = Field(None, alias="commentCount")
-    markets: List[PublicSearchMarket] = []
+    markets: list[PublicSearchMarket] = []
 
 
 class PublicSearchResponse(GammaBaseModel):
     """Represents the response from the public search endpoint."""
-    events: List[PublicSearchEvent] = []
-    pagination: Optional[Dict[str, Any]] = None
+    events: list[PublicSearchEvent] = []
+    pagination: Optional[dict[str, Any]] = None
