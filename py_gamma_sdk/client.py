@@ -265,6 +265,7 @@ class GammaClient:
         events = []
         events.extend(data.events)
         for page in range(2, page_count):
+            api_params["page"] = page
             data = self.public_search(query, **api_params)
             events.extend(data.events)
         

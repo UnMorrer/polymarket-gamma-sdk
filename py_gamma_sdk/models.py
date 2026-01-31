@@ -3,11 +3,34 @@ from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
 from datetime import datetime
 
 
+import re
+
+# Month name mapping for parsing malformed dates
+MONTH_MAP = {
+    'january': 1, 'february': 2, 'march': 3, 'april': 4,
+    'may': 5, 'june': 6, 'july': 7, 'august': 8,
+    'september': 9, 'october': 10, 'november': 11, 'december': 12
+}
+
+# Pattern for malformed dates like "April 1, 2023", "AprilT1, 2023", "February 27, 2022"
+MALFORMED_DATE_PATTERN = re.compile(
+    r'^([A-Za-z]+)[T\s](\d{1,2}),?\s*(\d{4})$'
+)
+
+
 def parse_flexible_datetime(value: Any) -> Any:
     """Parse datetime strings that may have non-standard formats."""
     if value is None or isinstance(value, datetime):
         return value
     if isinstance(value, str):
+        # Handle malformed dates like "AprilT1, 2023" -> proper datetime
+        match = MALFORMED_DATE_PATTERN.match(value)
+        if match:
+            month_name, day, year = match.groups()
+            month_num = MONTH_MAP.get(month_name.lower())
+            if month_num:
+                return datetime(int(year), month_num, int(day))
+
         # Handle format like '2026-01-30 19:37:52+00' -> '2026-01-30T19:37:52+00:00'
         if ' ' in value and 'T' not in value:
             value = value.replace(' ', 'T', 1)
@@ -160,7 +183,7 @@ class PublicSearchMarket(GammaBaseModel):
     group_item_title: Optional[str] = Field(None, alias="groupItemTitle")
     group_item_threshold: Optional[str] = Field(None, alias="groupItemThreshold")
     question_id: Optional[str] = Field(None, alias="questionID")
-    uma_end_date: Optional[datetime] = Field(None, alias="umaEndDate")
+    uma_end_date: FlexibleDatetime = Field(None, alias="umaEndDate")
     order_price_min_tick_size: Optional[float] = Field(None, alias="orderPriceMinTickSize")
     order_min_size: Optional[float] = Field(None, alias="orderMinSize")
     uma_resolution_status: Optional[str] = Field(None, alias="umaResolutionStatus")
